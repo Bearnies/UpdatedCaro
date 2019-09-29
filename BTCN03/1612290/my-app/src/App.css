@@ -43,7 +43,7 @@ ol, ul {
 }
 
 .square {
-  background: #fff;
+  background: #ddd;
   border: 1px solid #999;
   float: left;
   font-size: 24px;
@@ -83,17 +83,17 @@ ol, ul {
   width: 200px;
   background-color: #282c34;
   font-size: calc(1px + 2vmin);
-  color: white;
+  color: #fff;
 }
 
-.square.highlightw {
+.square.highlight {
   background: #32CD32;
 }
 
 .bold-selected-move{
   font-weight: bold;
   background: #282c34;
-  color: white;
+  color: #fff;
 }
 
 @keyframes App-logo-spin {

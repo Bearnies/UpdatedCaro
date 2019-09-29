@@ -17,7 +17,7 @@ class Game extends React.Component {
 
   handleClick(row, col) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const caroboard = Array(20).fill(null).map(row => new Array(20).fill(null));
+    const caroboard = Array(20).fill(null).map(() => new Array(20).fill(null));
     const currentStep = this.state.stepNumber;
     const squares = caroboard;
     
@@ -27,11 +27,11 @@ class Game extends React.Component {
       const current = history[i];
       if (i % 2 === 1)
       {
-        squares[current.row][current.col] = 'X';
+        caroboard[current.row][current.col] = 'X';
       }
       else
       {
-        squares[current.row][current.col] = 'O';
+        caroboard[current.row][current.col] = 'O';
       }
     }
 
@@ -69,15 +69,56 @@ class Game extends React.Component {
     });
   }
 
+  // calculateWinner(row, col, squares) {
+  //   if (this.calculateWinnerHorizontal(row, col, squares)) {
+  //     this.setState({winner:squares[row][col]})
+  //   } else if (this.calculateWinnerVertical(row, col, squares)) {
+  //     this.setState({winner:squares[row][col]})
+  //   } else if (this.calculateWinnerLCross(row, col, squares)) {
+  //     this.setState({winner:squares[row][col]})
+  //   } else if (this.calculateWinnerRCross(row, col, squares)) {
+  //     this.setState({winner:squares[row][col]})
+  //   }
+  //   return false;
+  // }
+
   calculateWinner(row, col, squares) {
-    if (this.calculateWinnerHorizontal(row, col, squares)) {
-      this.setState({winner:squares[row][col]})
-    } else if (this.calculateWinnerVertical(row, col, squares)) {
-      this.setState({winner:squares[row][col]})
-    } else if (this.calculateWinnerLCross(row, col, squares)) {
-      this.setState({winner:squares[row][col]})
-    } else if (this.calculateWinnerRCross(row, col, squares)) {
-      this.setState({winner:squares[row][col]})
+    const winSquares=this.state.winSquares;
+    const winVertical=this.calculateWinnerVertical(row,col,squares);
+    const winHorizontal=this.calculateWinnerHorizontal(row,col,squares);
+    const winLCross=this.calculateWinnerLCross(row,col,squares);
+    const winRCross=this.calculateWinnerRCross(row,col,squares);
+    
+    if (winVertical.result) {
+      const winResult=winVertical.win;
+      this.setState({
+        winner:squares[row][col],
+        winSquares:winSquares.concat(winResult),
+      })
+    }
+    
+    else if (winHorizontal.result) {
+      const winResult=winHorizontal.win;
+      this.setState({
+        winner:squares[row][col],
+        winSquares:winSquares.concat(winResult),
+      })
+    }
+
+    else if (winLCross.result) {
+      const winResult=winLCross.win;
+      this.setState({
+        winner:squares[row][col],
+        winSquares:winSquares.concat(winResult),
+      })
+    } 
+
+    else if (winRCross.result) {
+      const winResult=winRCross.win;
+      this.setState({
+        winner:squares[row][col],
+        winSquares:winSquares.concat(winResult),
+      })
     }
     return false;
   }
@@ -88,16 +129,6 @@ class Game extends React.Component {
     var end = null;
     var startCol = col;
     var endCol = col;
-
-    while(startCol < 19 && squares[row][startCol] === latestClick)  {
-      startCol++;
-    }
-
-    if (squares[row][startCol] === null) {
-      start = true;
-    } else {
-      start = false;
-    }
     
     while(endCol > 0 && squares[row][endCol] === latestClick)  {
       endCol--;
@@ -109,11 +140,43 @@ class Game extends React.Component {
       end = false;
     }
 
+    while(startCol < 19 && squares[row][startCol] === latestClick)  {
+      startCol++;
+    }
+
+    if (squares[row][startCol] === null) {
+      start = true;
+    } else {
+      start = false;
+    }
+
+    var winVertical = [];
     if (end || start) {
       if ((startCol - endCol) >= 6) {
-        return true;
-      } else if (((endCol === 0 && squares[row][endCol] === latestClick) || (startCol === 19 && squares[row][startCol] === latestClick)) && (startCol - endCol) >= 5) {
-        return true;
+        for (let i = endCol+1; i < startCol; i++) {
+          winVertical.push({row: row, col: i});
+        }
+        return {
+          result:true,
+          win:winVertical,
+        };
+      }
+
+      else if (((endCol === 0 && squares[row][endCol] === latestClick) || (startCol === 19 && squares[row][startCol] === latestClick)) && (startCol - endCol) >= 5) {
+        var endc=endCol;
+        var startc=startCol;
+        if (!end) {
+          endc-=1;
+        } else {
+          startc+=1;
+        }
+        for (let i = endc+1; i < startc; i++) {
+          winVertical.push({row: row, col: i});
+        }
+        return {
+          result:true,
+          win:winVertical,
+        };
       }
     }
     return false;
@@ -126,16 +189,6 @@ class Game extends React.Component {
     var startRow = row;
     var endRow = row;
 
-    while(startRow < 19 && squares[startRow][col] === latestClick)  {
-      startRow++;
-    }
-
-    if (squares[startRow][col] === null) {
-      start = true;
-    } else {
-      start = false;
-    }
-    
     while(endRow > 0 && squares[endRow][col] === latestClick)  {
       endRow--;
     }
@@ -146,11 +199,41 @@ class Game extends React.Component {
       end = false;
     }
 
+    while(startRow < 19 && squares[startRow][col] === latestClick)  {
+      startRow++;
+    }
+
+    if (squares[startRow][col] === null) {
+      start = true;
+    } else {
+      start = false;
+    }
+
+    var winHorizontal = [];
     if (end || start) {
       if ((startRow - endRow) >= 6) {
-        return true;
+          for (let i = endRow+1; i < startRow; i++) {
+            winHorizontal.push({row: i, col: col});
+          }
+          return {
+            result:true,
+            win:winHorizontal,
+          };
       } else if (((endRow === 0 && squares[endRow][col] === latestClick) || (startRow === 19 && squares[startRow][col] === latestClick)) && (startRow - endRow) >= 5) {
-        return true;
+        var endr=endRow;
+        var startr=startRow;
+        if (!end) {
+          endr-=1;
+        } else {
+          startr+=1;
+        }
+        for (let i = endr+1; i < startr; i++) {
+          winHorizontal.push({row: i, col: col});
+        }
+        return {
+          result:true,
+          win:winHorizontal,
+        };
       }
     }
     return false;
@@ -164,8 +247,19 @@ class Game extends React.Component {
     var rowleftUp = row;
     var colleftUp = col;
     var colrightDown = col;
+    
+    while(rowleftUp > 0 && colleftUp > 0 && squares[rowleftUp][colleftUp] === latestClick)  {
+      rowleftUp--;
+      colleftUp--;
+    }
 
-    while(rowrightDown < 19 && colrightDown > 0 && squares[rowrightDown][colrightDown] === latestClick)  {
+    if (squares[rowleftUp][colleftUp] === null) {
+      end = true;
+    } else {
+      end = false;
+    }
+
+    while(rowrightDown < 19 && colrightDown < 19 && squares[rowrightDown][colrightDown] === latestClick)  {
       rowrightDown++;
       colrightDown++;
     }
@@ -175,23 +269,38 @@ class Game extends React.Component {
     } else {
       start = false;
     }
-    
-    while(rowleftUp > 0 && colleftUp < 19 && squares[rowleftUp][colleftUp] === latestClick)  {
-      colleftUp--;
-      rowleftUp--;
-    }
 
-    if (squares[rowleftUp][colleftUp] === null) {
-      end = true;
-    } else {
-      end = false;
-    }
-
+    var winLCross = [];
+    var tempa = colleftUp;
+    var tempb = rowleftUp;
     if (end || start) {
       if ((rowrightDown - rowleftUp) >= 6) {
-        return true
-      } else if (((rowrightDown === 19 && squares[rowrightDown][colrightDown] === latestClick) || (colrightDown === 19 && squares[rowleftUp][colleftUp] === latestClick)) && (rowrightDown - rowleftUp) >= 5) {
-        return true
+        while (tempb!==rowrightDown) {
+          tempb+=1;
+          tempa+=1;
+          winLCross.push({row:tempb, col:tempa});
+        }
+        return {
+          result:true,
+          win:winLCross,
+        };
+      } else if ((colrightDown === 19 || colleftUp === 0 || rowrightDown === 19 || rowleftUp === 0) && (rowrightDown - rowleftUp) >= 5 && (squares[rowrightDown][colrightDown] === latestClick || squares[rowleftUp][colleftUp] === latestClick)) {
+        var tempbrd=rowrightDown;
+        if (!end) {
+          tempb-=1;
+          tempa-=1;
+        } else {
+          tempbrd+=1;
+        }
+        while (tempb<tempbrd-1) {
+          tempb+=1;
+          tempa+=1;
+          winLCross.push({row:tempb, col:tempa});
+        }
+        return {
+          result:true,
+          win:winLCross,
+        };
       }
     }
     return false;
@@ -206,20 +315,9 @@ class Game extends React.Component {
     var colleftDown = col;
     var colrightUp = col;
 
-    while(rowleftDown < 19 && colleftDown > 0 && squares[rowleftDown][colleftDown] === latestClick)  {
-      rowleftDown++;
-      colleftDown--;
-    }
-
-    if (squares[rowleftDown][colleftDown] === null) {
-      start = true;
-    } else {
-      start = false;
-    }
-    
-    while(rowrightUp > 0 && colrightUp < 19 && squares[rowrightUp][colrightUp] === latestClick)  {
-      colrightUp++;
-      rowrightUp--;
+    while(rowrightUp < 19 && colrightUp > 0 && squares[rowrightUp][colrightUp] === latestClick)  {
+      rowrightUp++;
+      colrightUp--;
     }
 
     if (squares[rowrightUp][colrightUp] === null) {
@@ -228,11 +326,48 @@ class Game extends React.Component {
       end = false;
     }
 
+    while(rowleftDown > 0 && colleftDown < 19 && squares[rowleftDown][colleftDown] === latestClick)  {
+      colleftDown++;
+      rowleftDown--;
+    }
+
+    if (squares[rowleftDown][colleftDown] === null) {
+      start = true;
+    } else {
+      start = false;
+    }
+
+    var winRCross=[];
+    var tempa=colleftDown;
+    var tempb=rowleftDown;
     if (end || start) {
-      if ((rowleftDown - rowrightUp) >= 6) {  
-        return true
-      } else if (((rowleftDown === 19 && squares[rowleftDown][colleftDown] === latestClick) || (colrightUp === 19 && squares[rowrightUp][colrightUp] === latestClick)) && (rowleftDown - rowrightUp) >= 5) {
-        return true
+      if ((colleftDown - colrightUp) >= 6) {  
+        while (tempb!==rowrightUp) {
+          tempb+=1;
+          tempa-=1;
+          winRCross.push({row: tempb, col: tempa});
+        }
+        return {
+          result:true,
+          win:winRCross,
+        };
+      } else if ((colleftDown === 19 || colrightUp === 0|| rowleftDown === 0 || rowrightUp === 19) && (colleftDown - colrightUp) >= 5 && (squares[rowleftDown][colleftDown] === latestClick || squares[rowrightUp][colrightUp] === latestClick)) {
+        var tempbru=rowrightUp;
+        if (end) {
+          tempb-=1;
+          tempa+=1;
+        } else {
+          tempbru+=1;
+        }
+        while (tempb<tempbru-1) {
+          tempb+=1;
+          tempa-=1;
+          winRCross.push({row: tempb, col: tempa});
+        }
+        return {
+          result:true,
+          win:winRCross,
+        };
       }
     }
     return false;
@@ -266,10 +401,9 @@ class Game extends React.Component {
 
 
   render() {
-    const winner = this.state.winner;
     const stepNumber = this.state.stepNumber;
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const caroboard = Array(20).fill(null).map(row => new Array(20).fill(null));
+    const caroboard = Array(20).fill(null).map(() => new Array(20).fill(null));
 
     for (var i = 1; i < history.length; i++)
     {
@@ -283,6 +417,14 @@ class Game extends React.Component {
         caroboard[current.row][current.col] = 'O';
       }
     }
+
+    const winSquares = this.state.winSquares;
+    const winResult = Array(20).fill(null).map(() => new Array(20).fill("square"));
+    for (let i = 0; i < winSquares.length; i++) {
+      const temp = winSquares[i];
+      winResult[temp.row][temp.col] = 'square highlight';
+    }
+    const winner = this.state.winner;
 
     const moves = this.state.history.map((step, move) => {
       const latestMoveRow = 1 + step.row;
@@ -314,7 +456,7 @@ class Game extends React.Component {
         <div>
           <div className="game">
             <div className="game-board">
-              <Board squares={caroboard} onClick={(row, col) => this.handleClick(row, col)}></Board>
+              <Board squares={caroboard} onClick={(row, col) => this.handleClick(row, col)} winSquares={winResult}></Board>
             </div>
             <div className="game-info">
               <button class="classExtraBtn" onClick={() => this.playAgain()}>Play Again</button>

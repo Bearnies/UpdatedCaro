@@ -1,10 +1,10 @@
 import React from 'react';
 
 function Square(props) {
-    const className = 'square' + (props.highlightw ? 'highlight' : ''); 
+    const className = 'square' + (props.highlight ? 'highlight' : ''); 
     return (
-      <button className="square" 
-        onClick={props.onClick}>
+      <button className = {props.className} 
+        onClick = {props.onClick}>
         {props.value}
       </button>
     ); 

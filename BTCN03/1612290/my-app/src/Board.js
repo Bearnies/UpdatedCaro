@@ -5,9 +5,9 @@ class Board extends React.Component {
   renderBoard(row) {
     const squares = [];
       for (let col = 0; col < 20; col++) 
-      {      
+      {           
         squares.push(
-          <Square value = {this.props.squares[row][col]} onClick={() => this.props.onClick(row, col)}></Square>
+          <Square key = {row, col}      className={this.props.winSquares[row][col]}      value = {this.props.squares[row][col]} onClick={() => this.props.onClick(row, col)}></Square>
         )  
       }
       return (
