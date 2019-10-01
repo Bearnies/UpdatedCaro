@@ -16,15 +16,18 @@ class Game extends React.Component {
   }
 
   handleClick(row, col) {
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const caroboard = Array(20).fill(null).map(() => new Array(20).fill(null));
-    const currentStep = this.state.stepNumber;
+    const {history, stepNumber, winner, xIsNext} = this.state;
+    const currhistory = history.slice(0, stepNumber + 1);
+    const caroboard = Array(20)
+    .fill(null)
+    .map(() => new Array(20).fill(null));
+
     const squares = caroboard;
     
     //Go to move.
-    for (var i = 1; i < history.length; i++)
+    for (let i = 1; i < currhistory.length; i += 1)
     {
-      const current = history[i];
+      const current = currhistory[i];
       if (i % 2 === 1)
       {
         caroboard[current.row][current.col] = 'X';
@@ -37,8 +40,8 @@ class Game extends React.Component {
 
     //Sau khi Win mà sử dụng "Go to move" thì check xem stepNumber của move đó có = history.length không. Nếu không
     //thì chứng tỏ đã sử dụng "Go to move" và cho phép người chơi tiếp tục chơi từ move.
-    var tempWinner = this.state.winner;
-    if (currentStep !== (this.state.history.length - 1))
+    let tempWinner = winner;
+    if (stepNumber !== (this.state.history.length - 1))
     {
       tempWinner = null;
       this.setState(
@@ -49,15 +52,15 @@ class Game extends React.Component {
       );
     }
 
-    const winner = tempWinner;
-    if (winner || squares[row][col]) {
+    const currwinner = tempWinner;
+    if (currwinner || squares[row][col]) {
       return;
     }
-    squares[row][col] = this.state.xIsNext ? 'X' : 'O';
+    squares[row][col] = xIsNext ? 'X' : 'O';
     this.calculateWinner(row, col, squares);
 
     this.setState({
-      history: history.concat([
+      history: currhistory.concat([
         {
           squares: squares[row][col],
           row: row,
@@ -65,7 +68,7 @@ class Game extends React.Component {
         }
       ]),
       stepNumber: history.length,
-      xIsNext: !this.state.xIsNext,
+      xIsNext: !xIsNext,
     });
   }
 
@@ -84,113 +87,54 @@ class Game extends React.Component {
 
   calculateWinner(row, col, squares) {
     const winSquares=this.state.winSquares;
-    const winVertical=this.calculateWinnerVertical(row,col,squares);
     const winHorizontal=this.calculateWinnerHorizontal(row,col,squares);
+    const winVertical=this.calculateWinnerVertical(row,col,squares);
     const winLCross=this.calculateWinnerLCross(row,col,squares);
     const winRCross=this.calculateWinnerRCross(row,col,squares);
     
     if (winVertical.result) {
-      const winResult=winVertical.win;
+      const result = winVertical.winLine;
       this.setState({
         winner:squares[row][col],
-        winSquares:winSquares.concat(winResult),
+        winSquares:winSquares.concat(result),
       })
     }
     
     else if (winHorizontal.result) {
-      const winResult=winHorizontal.win;
+      const result = winHorizontal.winLine;
       this.setState({
         winner:squares[row][col],
-        winSquares:winSquares.concat(winResult),
+        winSquares:winSquares.concat(result),
       })
     }
 
     else if (winLCross.result) {
-      const winResult=winLCross.win;
+      const result = winLCross.winLine;
       this.setState({
         winner:squares[row][col],
-        winSquares:winSquares.concat(winResult),
+        winSquares:winSquares.concat(result),
       })
     } 
 
     else if (winRCross.result) {
-      const winResult=winRCross.win;
+      const result = winRCross.winLine;
       this.setState({
         winner:squares[row][col],
-        winSquares:winSquares.concat(winResult),
+        winSquares:winSquares.concat(result),
       })
-    }
-    return false;
-  }
-
-  calculateWinnerVertical(row, col, squares) {
-    var latestClick = squares[row][col];
-    var start = null;
-    var end = null;
-    var startCol = col;
-    var endCol = col;
-    
-    while(endCol > 0 && squares[row][endCol] === latestClick)  {
-      endCol--;
-    }
-
-    if (squares[row][endCol] === null) {
-      end = true;
-    } else {
-      end = false;
-    }
-
-    while(startCol < 19 && squares[row][startCol] === latestClick)  {
-      startCol++;
-    }
-
-    if (squares[row][startCol] === null) {
-      start = true;
-    } else {
-      start = false;
-    }
-
-    var winVertical = [];
-    if (end || start) {
-      if ((startCol - endCol) >= 6) {
-        for (let i = endCol+1; i < startCol; i++) {
-          winVertical.push({row: row, col: i});
-        }
-        return {
-          result:true,
-          win:winVertical,
-        };
-      }
-
-      else if (((endCol === 0 && squares[row][endCol] === latestClick) || (startCol === 19 && squares[row][startCol] === latestClick)) && (startCol - endCol) >= 5) {
-        var endc=endCol;
-        var startc=startCol;
-        if (!end) {
-          endc-=1;
-        } else {
-          startc+=1;
-        }
-        for (let i = endc+1; i < startc; i++) {
-          winVertical.push({row: row, col: i});
-        }
-        return {
-          result:true,
-          win:winVertical,
-        };
-      }
     }
     return false;
   }
 
   calculateWinnerHorizontal(row, col, squares) {
-    var latestClick = squares[row][col];
-    var start = null;
-    var end = null;
-    var startRow = row;
-    var endRow = row;
+    let latestClick = squares[row][col];
+    let start = null;
+    let end = null;
+    let startRow = row;
+    let endRow = row;
 
     while(endRow > 0 && squares[endRow][col] === latestClick)  {
-      endRow--;
+      endRow -= 1;
     }
 
     if (squares[endRow][col] === null) {
@@ -200,7 +144,7 @@ class Game extends React.Component {
     }
 
     while(startRow < 19 && squares[startRow][col] === latestClick)  {
-      startRow++;
+      startRow += 1;
     }
 
     if (squares[startRow][col] === null) {
@@ -209,30 +153,97 @@ class Game extends React.Component {
       start = false;
     }
 
-    var winHorizontal = [];
+    let winHorizontal = [];
     if (end || start) {
       if ((startRow - endRow) >= 6) {
-          for (let i = endRow+1; i < startRow; i++) {
+          for (let i = endRow + 1; i < startRow; i += 1) {
             winHorizontal.push({row: i, col: col});
           }
           return {
-            result:true,
-            win:winHorizontal,
+            result: true,
+            winLine: winHorizontal,
           };
-      } else if (((endRow === 0 && squares[endRow][col] === latestClick) || (startRow === 19 && squares[startRow][col] === latestClick)) && (startRow - endRow) >= 5) {
-        var endr=endRow;
-        var startr=startRow;
+      } else if (
+       ((endRow === 0 && squares[endRow][col] === latestClick) ||
+       (startRow === 19 && squares[startRow][col] === latestClick)) &&
+       (startRow - endRow) >= 5
+      ) {
+        let endr=endRow;
+        let startr=startRow;
         if (!end) {
-          endr-=1;
+          endr -= 1;
         } else {
-          startr+=1;
+          startr += 1;
         }
-        for (let i = endr+1; i < startr; i++) {
+        for (let i = endr + 1; i < startr; i += 1) {
           winHorizontal.push({row: i, col: col});
         }
         return {
-          result:true,
-          win:winHorizontal,
+          result: true,
+          winLine: winHorizontal,
+        };
+      }
+    }
+    return false;
+  }
+
+  calculateWinnerVertical(row, col, squares) {
+    let latestClick = squares[row][col];
+    let start = null;
+    let end = null;
+    let startCol = col;
+    let endCol = col;
+    
+    while(endCol > 0 && squares[row][endCol] === latestClick)  {
+      endCol -= 1;
+    }
+
+    if (squares[row][endCol] === null) {
+      end = true;
+    } else {
+      end = false;
+    }
+
+    while(startCol < 19 && squares[row][startCol] === latestClick)  {
+      startCol += 1;
+    }
+
+    if (squares[row][startCol] === null) {
+      start = true;
+    } else {
+      start = false;
+    }
+
+    let winVertical = [];
+    if (end || start) {
+      if ((startCol - endCol) >= 6) {
+        for (let i = endCol + 1; i < startCol; i += 1) {
+          winVertical.push({row: row, col: i});
+        }
+        return {
+          result: true,
+          winLine: winVertical,
+        };
+      }
+
+      else if (
+      ((endCol === 0 && squares[row][endCol] === latestClick) ||
+      (startCol === 19 && squares[row][startCol] === latestClick)) &&
+      (startCol - endCol) >= 5
+      ) {
+        let endc = endCol;
+        let startc = startCol;
+        if (!end) {
+          endc -= 1;
+        } else {
+          startc += 1;
+        }
+        for (let i = endc+1; i < startc; i += 1) {
+          winVertical.push({row: row, col: i});
+        }
+        return {
+          result: true,
+          winLine: winVertical,
         };
       }
     }
@@ -240,17 +251,17 @@ class Game extends React.Component {
   }
 
   calculateWinnerLCross(row, col, squares) {
-    var latestClick = squares[row][col];
-    var start = null;
-    var end = null;
-    var rowrightDown = row;
-    var rowleftUp = row;
-    var colleftUp = col;
-    var colrightDown = col;
+    let latestClick = squares[row][col];
+    let start = null;
+    let end = null;
+    let rowrightDown = row;
+    let rowleftUp = row;
+    let colleftUp = col;
+    let colrightDown = col;
     
     while(rowleftUp > 0 && colleftUp > 0 && squares[rowleftUp][colleftUp] === latestClick)  {
-      rowleftUp--;
-      colleftUp--;
+      rowleftUp -= 1;
+      colleftUp -= 1;
     }
 
     if (squares[rowleftUp][colleftUp] === null) {
@@ -260,8 +271,8 @@ class Game extends React.Component {
     }
 
     while(rowrightDown < 19 && colrightDown < 19 && squares[rowrightDown][colrightDown] === latestClick)  {
-      rowrightDown++;
-      colrightDown++;
+      rowrightDown += 1;
+      colrightDown += 1;
     }
 
     if (squares[rowrightDown][colrightDown] === null) {
@@ -270,36 +281,41 @@ class Game extends React.Component {
       start = false;
     }
 
-    var winLCross = [];
-    var tempa = colleftUp;
-    var tempb = rowleftUp;
+    let winLCross = [];
+    let temprow = rowleftUp;
+    let tempcol = colleftUp;
     if (end || start) {
       if ((rowrightDown - rowleftUp) >= 6) {
-        while (tempb!==rowrightDown) {
-          tempb+=1;
-          tempa+=1;
-          winLCross.push({row:tempb, col:tempa});
+        while (temprow !== rowrightDown - 1) {
+          temprow += 1;
+          tempcol += 1;
+          winLCross.push({row: temprow, col: tempcol});
         }
         return {
-          result:true,
-          win:winLCross,
+          result: true,
+          winLine: winLCross,
         };
-      } else if ((colrightDown === 19 || colleftUp === 0 || rowrightDown === 19 || rowleftUp === 0) && (rowrightDown - rowleftUp) >= 5 && (squares[rowrightDown][colrightDown] === latestClick || squares[rowleftUp][colleftUp] === latestClick)) {
-        var tempbrd=rowrightDown;
+      } else if (
+       (colrightDown === 19 || colleftUp === 0 || rowrightDown === 19 || rowleftUp === 0) &&
+       (rowrightDown - rowleftUp) >= 5 &&
+       (squares[rowrightDown][colrightDown] === latestClick ||
+       squares[rowleftUp][colleftUp] === latestClick)
+      ) {
+        let checkLCross = rowrightDown;
         if (!end) {
-          tempb-=1;
-          tempa-=1;
+          temprow -= 1;
+          tempcol -= 1;
         } else {
-          tempbrd+=1;
+          checkLCross += 1;
         }
-        while (tempb<tempbrd-1) {
-          tempb+=1;
-          tempa+=1;
-          winLCross.push({row:tempb, col:tempa});
+        while (temprow < checkLCross - 1) {
+          temprow += 1;
+          tempcol += 1;
+          winLCross.push({row: temprow, col: tempcol});
         }
         return {
-          result:true,
-          win:winLCross,
+          result: true,
+          winLine: winLCross,
         };
       }
     }
@@ -307,17 +323,17 @@ class Game extends React.Component {
   }
 
   calculateWinnerRCross(row, col, squares) {
-    var latestClick = squares[row][col];
-    var start = null;
-    var end = null;
-    var rowleftDown = row;
-    var rowrightUp = row;
-    var colleftDown = col;
-    var colrightUp = col;
+    let latestClick = squares[row][col];
+    let start = null;
+    let end = null;
+    let rowleftDown = row;
+    let rowrightUp = row;
+    let colleftDown = col;
+    let colrightUp = col;
 
     while(rowrightUp < 19 && colrightUp > 0 && squares[rowrightUp][colrightUp] === latestClick)  {
-      rowrightUp++;
-      colrightUp--;
+      rowrightUp += 1;
+      colrightUp -= 1;
     }
 
     if (squares[rowrightUp][colrightUp] === null) {
@@ -327,8 +343,8 @@ class Game extends React.Component {
     }
 
     while(rowleftDown > 0 && colleftDown < 19 && squares[rowleftDown][colleftDown] === latestClick)  {
-      colleftDown++;
-      rowleftDown--;
+      colleftDown += 1;
+      rowleftDown -= 1;
     }
 
     if (squares[rowleftDown][colleftDown] === null) {
@@ -337,36 +353,40 @@ class Game extends React.Component {
       start = false;
     }
 
-    var winRCross=[];
-    var tempa=colleftDown;
-    var tempb=rowleftDown;
+    let winRCross = [];
+    let temprow = rowleftDown;
+    let tempcol = colleftDown;
     if (end || start) {
       if ((colleftDown - colrightUp) >= 6) {  
-        while (tempb!==rowrightUp) {
-          tempb+=1;
-          tempa-=1;
-          winRCross.push({row: tempb, col: tempa});
+        while (temprow !== rowrightUp - 1) {
+          temprow += 1;
+          tempcol -= 1;
+          winRCross.push({row: temprow, col: tempcol});
         }
         return {
-          result:true,
-          win:winRCross,
+          result: true,
+          winLine: winRCross,
         };
-      } else if ((colleftDown === 19 || colrightUp === 0|| rowleftDown === 0 || rowrightUp === 19) && (colleftDown - colrightUp) >= 5 && (squares[rowleftDown][colleftDown] === latestClick || squares[rowrightUp][colrightUp] === latestClick)) {
-        var tempbru=rowrightUp;
+      } else if (
+        (colleftDown === 19 || colrightUp === 0|| rowleftDown === 0 || rowrightUp === 19) &&
+        (colleftDown - colrightUp) >= 5 &&
+        (squares[rowleftDown][colleftDown] === latestClick || squares[rowrightUp][colrightUp] === latestClick)
+        ) {
+        let checkRCross = rowrightUp;
         if (end) {
-          tempb-=1;
-          tempa+=1;
+          temprow -= 1;
+          tempcol += 1;
         } else {
-          tempbru+=1;
+          checkRCross += 1;
         }
-        while (tempb<tempbru-1) {
-          tempb+=1;
-          tempa-=1;
-          winRCross.push({row: tempb, col: tempa});
+        while (temprow < checkRCross - 1) {
+          temprow += 1;
+          tempcol -= 1;
+          winRCross.push({row: temprow, col: tempcol});
         }
         return {
-          result:true,
-          win:winRCross,
+          result: true,
+          winLine: winRCross,
         };
       }
     }
@@ -374,7 +394,10 @@ class Game extends React.Component {
   }
 
   playAgain(){
-    const newSquares = Array(20).fill(null).map(row => new Array(20).fill(null));
+    const newSquares = Array(20)
+    .fill(null)
+    .map(row => new Array(20).fill(null));
+
     this.setState({
       caroboard: newSquares,
       xIsNext: true,
@@ -394,20 +417,23 @@ class Game extends React.Component {
 
   handleSort()
   {
+    const {sortAscend} = this.state;
     this.setState({
-      sortAscend: !this.state.sortAscend
+      sortAscend: !sortAscend
     });
   }
 
 
   render() {
-    const stepNumber = this.state.stepNumber;
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const caroboard = Array(20).fill(null).map(() => new Array(20).fill(null));
+    const {stepNumber, history, winSquares, winner, xIsNext, sortAscend} = this.state;
+    const currhistory = history.slice(0, stepNumber + 1);
+    const caroboard = Array(20)
+    .fill(null)
+    .map(() => new Array(20).fill(null));
 
-    for (var i = 1; i < history.length; i++)
+    for (let i = 1; i < currhistory.length; i += 1)
     {
-      const current = history[i];
+      const current = currhistory[i];
       if (i % 2 === 1)
       {
         caroboard[current.row][current.col] = 'X';
@@ -418,15 +444,16 @@ class Game extends React.Component {
       }
     }
 
-    const winSquares = this.state.winSquares;
-    const winResult = Array(20).fill(null).map(() => new Array(20).fill("square"));
-    for (let i = 0; i < winSquares.length; i++) {
-      const temp = winSquares[i];
-      winResult[temp.row][temp.col] = 'square highlight';
-    }
-    const winner = this.state.winner;
+    const result = Array(20)
+    .fill(null)
+    .map(() => new Array(20).fill("square"));
 
-    const moves = this.state.history.map((step, move) => {
+    for (let i = 0; i < winSquares.length; i += 1) {
+      const temp = winSquares[i];
+      result[temp.row][temp.col] = 'square highlight';
+    }
+
+    const moves = history.map((step, move) => {
       const latestMoveRow = 1 + step.row;
       const latestMoveCol = 1 + step.col;
       const desc = move ?
@@ -439,7 +466,6 @@ class Game extends React.Component {
       );
     });
 
-    const sortAscend = this.state.sortAscend;
     if (!sortAscend)
     {
       moves.reverse();
@@ -449,14 +475,14 @@ class Game extends React.Component {
     if (winner) {
       status = 'Winner: ' + winner;
     } else {
-      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+      status = 'Next player: ' + (xIsNext ? 'X' : 'O');
     }
 
     return (
         <div>
           <div className="game">
             <div className="game-board">
-              <Board squares={caroboard} onClick={(row, col) => this.handleClick(row, col)} winSquares={winResult}></Board>
+              <Board squares={caroboard} onClick={(row, col) => this.handleClick(row, col)} winSquares={result}></Board>
             </div>
             <div className="game-info">
               <button class="classExtraBtn" onClick={() => this.playAgain()}>Play Again</button>
