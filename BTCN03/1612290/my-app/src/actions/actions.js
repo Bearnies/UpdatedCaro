@@ -1,34 +1,46 @@
 export const LATEST_CLICK = 'LATEST_CLICK'
+export const X_ISNEXT = 'X_ISNEXT'
 export const PLAY_AGAIN = 'PLAY_AGAIN';
 export const SORT_ASCEND = 'SORT_ASCEND';
 export const CAL_WINNER = 'CAL_WINNER'
+export const GO_TO_MOVE = 'GO_TO_MOVE'
 
 export function latestClick(row, col, player) {
     return {
-        type: types.LATEST_CLICK,
+        type: 'LATEST_CLICK',
         row,
         col,
         player
     };
 }
 
-export function calculateWinner(row, col, winner) {
+export function xIsNext() {
     return {
-        type: types.CAL_WINNER,
-        row,
-        col,
-        winner
+        type: 'X_ISNEXT',
+    };
+}
+
+export function calculateWinner() {
+    return {
+        type: 'CAL_WINNER',
     };
 }
 
 export function playAgain() {
     return {
-        type: types.PLAY_AGAIN
+        type: 'PLAY_AGAIN'
     };
 }
 
 export function sortAscend() {
     return {
-        type: types.SORT_ASCEND
+        type: 'SORT_ASCEND'
+    };
+}
+
+export function goToMove(step) {
+    return {
+        type: 'GO_TO_MOVE',
+        step
     };
 }
