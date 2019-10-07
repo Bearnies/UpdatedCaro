@@ -19,44 +19,79 @@ const initialState = {
     winSquares: [],
 };
 
-export default function tictactoeGame(state = initialState, action){
+export default function tictactoeGame(state = initialState, action) {
+    const {history, stepNumber, winner, xIsNext} = this.state;
+    const currhistory = history.slice(0, stepNumber + 1);
+    const caroboard = Array(20)
+    .fill(null)
+    .map(() => new Array(20).fill(null));
+    const squares = caroboard;
+
     switch (action.type){
         case LATEST_CLICK:
-            caroboard[row][col] = xIsNext ? 'X' : 'O';
+            let tempWinner = winner;
+            const { history } = this.state;
+            if (stepNumber !== (history.length - 1))
+            {
+                tempWinner = null;
+                return {
+                    winner: null,
+                    winSquares: []
+                };
+            }
+            const currwinner = tempWinner;
+            if (currwinner || squares[row][col]) {
+                return;
+            }
+            squares[row][col] = xIsNext ? 'X' : 'O';
+
             return {
                 ...state,
-        };
+                xIsNext: action.xIsNext,
+                winner: currwinner,
+            };
 
         case X_ISNEXT:
             return {
                 ...state,
                 xIsNext: action.xIsNext
-        };
+            };
 
         case GO_TO_MOVE:
+            for (let i = 1; i < currhistory.length; i += 1)
+            {
+            const current = currhistory[i];
+            if (i % 2 === 1)
+            {
+                caroboard[current.row][current.col] = 'X';
+            }
+            else
+            {
+                caroboard[current.row][current.col] = 'O';
+            }
+            }
             return {
                 ...state,
-                stepNumber: step,
-                xIsNext: (step % 2) === 0
-        };
+                history: currhistory.concat([
+                    {
+                      squares: squares[row][col],
+                      row: row,
+                      col: col,
+                    }
+                  ]),
+                stepNumber: history.length,
+                xIsNext: !xIsNext
+            };
 
         case PLAY_AGAIN:
             return {
-                ...state,
-                caroboard: Array(20)
-                .fill(null)
-                .map(() => new Array(20).fill(null)),
-                xIsNext: true,
-                winner: null,
-                history: [{row: null, col: null}],
-                stepNumber: null,
-                winSquares: []
-        };
+                ...initialState
+            };
 
         case SORT_ASCEND:
             return {
                 ...state,
-                sortAscend: !sortAscend
+                sortAscend: action.sortAscend
             };
 
         case CAL_WINNER:

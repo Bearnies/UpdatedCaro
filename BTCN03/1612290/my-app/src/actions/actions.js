@@ -5,12 +5,13 @@ export const SORT_ASCEND = 'SORT_ASCEND';
 export const CAL_WINNER = 'CAL_WINNER'
 export const GO_TO_MOVE = 'GO_TO_MOVE'
 
-export function latestClick(row, col, player) {
+export function latestClick(row, col) {
     return {
         type: 'LATEST_CLICK',
-        row,
-        col,
-        player
+        payload: {
+            row,
+            col
+        }
     };
 }
 
@@ -38,9 +39,8 @@ export function sortAscend() {
     };
 }
 
-export function goToMove(step) {
+export function goToMove() {
     return {
         type: 'GO_TO_MOVE',
-        step
     };
 }
