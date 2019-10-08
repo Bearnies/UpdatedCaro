@@ -1,10 +1,12 @@
 import {
-    LATEST_CLICK,
     X_ISNEXT,
+    NEW_X_ISNEXT,
     PLAY_AGAIN,
-    GO_TO_MOVE,
     SORT_ASCEND,
-    CAL_WINNER
+    GET_WINSQUARES,
+    NEW_WINNER,
+    NEW_HISTORY,
+    NEW_STEPNUMBER,
 } from '../actions/actions'
 
 const initialState = {
@@ -20,87 +22,49 @@ const initialState = {
 };
 
 export default function tictactoeGame(state = initialState, action) {
-    const {history, stepNumber, winner, xIsNext} = this.state;
-    const currhistory = history.slice(0, stepNumber + 1);
-    const caroboard = Array(20)
-    .fill(null)
-    .map(() => new Array(20).fill(null));
-    const squares = caroboard;
-
-    switch (action.type){
-        case LATEST_CLICK:
-            let tempWinner = winner;
-            const { history } = this.state;
-            if (stepNumber !== (history.length - 1))
-            {
-                tempWinner = null;
-                return {
-                    winner: null,
-                    winSquares: []
-                };
-            }
-            const currwinner = tempWinner;
-            if (currwinner || squares[row][col]) {
-                return;
-            }
-            squares[row][col] = xIsNext ? 'X' : 'O';
-
-            return {
-                ...state,
-                xIsNext: action.xIsNext,
-                winner: currwinner,
-            };
-
+    switch (action.type) {
         case X_ISNEXT:
-            return {
-                ...state,
-                xIsNext: action.xIsNext
-            };
+            return !state
 
-        case GO_TO_MOVE:
-            for (let i = 1; i < currhistory.length; i += 1)
-            {
-            const current = currhistory[i];
-            if (i % 2 === 1)
-            {
-                caroboard[current.row][current.col] = 'X';
-            }
-            else
-            {
-                caroboard[current.row][current.col] = 'O';
-            }
-            }
+        case NEW_X_ISNEXT:
             return {
                 ...state,
-                history: currhistory.concat([
-                    {
-                      squares: squares[row][col],
-                      row: row,
-                      col: col,
-                    }
-                  ]),
-                stepNumber: history.length,
-                xIsNext: !xIsNext
-            };
+                xIsNext: action.isXNext
+            }
 
         case PLAY_AGAIN:
             return {
-                ...initialState
-            };
+                ...state
+            }
 
         case SORT_ASCEND:
+            return !state
+
+        case GET_WINSQUARES:
             return {
                 ...state,
-                sortAscend: action.sortAscend
-            };
+                winSquares: action.winSquares
+            }
 
-        case CAL_WINNER:
-            return{
+        case NEW_WINNER:
+            return {
                 ...state,
                 winner: action.winner
-            };
+            }
+
+        case NEW_HISTORY:
+            return {
+                ...state,
+                history: action.newhistory
+            }
+        
+        case NEW_STEPNUMBER:
+            return {
+                ...state,
+                stepNumber: action.newstepnumber
+            }
 
         default:
-            return state;
+            return state
     }
 }
